@@ -79,13 +79,13 @@ func LiveCheck(w http.ResponseWriter, r *http.Request) {
 
 // InitServer initializes the REST api server
 func InitServer(conf *config.AppConfig) error {
-	// Initiate the SQL database
+	// Initiate Dynamo database
 	dberror := dynamo.NewDatabase(conf.Dynamo)
 	if dberror != nil {
 		log.D("Faile to open dynamodb: %v", dberror.Error())
 	}
 
-	// initialize radis for in-memory cache
+	// Initiate radis for in-memory cache
 	rediscache.NewRedisCache(conf.Redis)
 
 	// Init Router
