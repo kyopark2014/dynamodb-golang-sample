@@ -328,4 +328,6 @@ Content-Length: 65
 {"UID":"kyopark","Name":"John","Email":"john@mail.com","Age":25}
 ```
 
+## Reference
 
+https://github.com/awsdocs/aws-doc-sdk-examples/tree/master/go/example_code/dynamodb
