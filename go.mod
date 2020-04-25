@@ -9,7 +9,7 @@ require (
 	github.com/emirpasic/gods v1.12.0 // indirect
 	github.com/garyburd/redigo v1.6.0 // indirect
 	github.com/go-redis/redis v6.15.7+incompatible // indirect
-	github.com/gomodule/redigo v2.0.0+incompatible // indirect
+	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/gorilla/mux v1.7.4
 	github.com/looplab/fsm v0.1.0 // indirect
 	github.com/onsi/ginkgo v1.12.0 // indirect

@@ -3,6 +3,7 @@ package main
 import (
 	"dynamodb-golang-sample/internal/config"
 	"dynamodb-golang-sample/internal/log"
+	"dynamodb-golang-sample/internal/rediscache"
 	"dynamodb-golang-sample/internal/server"
 	"os"
 	"os/signal"
@@ -88,6 +89,6 @@ func StartService() error {
 // down this service
 func Finalize() {
 	//	db.Close()
-	//	client.Close()
+	rediscache.Close()
 	log.E("Shutdown service...")
 }

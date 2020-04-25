@@ -4,6 +4,7 @@ import (
 	"dynamodb-golang-sample/internal/config"
 	"dynamodb-golang-sample/internal/data"
 	"dynamodb-golang-sample/internal/log"
+	"errors"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -45,22 +46,14 @@ func NewDatabase(cfg config.DynamoConfig) error {
 	input := &dynamodb.CreateTableInput{
 		AttributeDefinitions: []*dynamodb.AttributeDefinition{
 			{
-				AttributeName: aws.String("Uid"),
-				AttributeType: aws.String("S"),
-			},
-			{
-				AttributeName: aws.String("Name"),
+				AttributeName: aws.String("UID"),
 				AttributeType: aws.String("S"),
 			},
 		},
 		KeySchema: []*dynamodb.KeySchemaElement{
 			{
-				AttributeName: aws.String("Uid"),
+				AttributeName: aws.String("UID"),
 				KeyType:       aws.String("HASH"),
-			},
-			{
-				AttributeName: aws.String("Name"),
-				KeyType:       aws.String("RANGE"),
 			},
 		},
 		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
@@ -84,16 +77,14 @@ func NewDatabase(cfg config.DynamoConfig) error {
 }
 
 // Write is to write an item to dynamodb
-func Write(input data.UserProfile) error {
-	item, err := dynamodbattribute.MarshalMap(input)
+func Write(item data.UserProfile) error {
+	av, err := dynamodbattribute.MarshalMap(item)
 	if err != nil {
 		return err
 	}
 
-	log.I("%v", item)
-
 	Input := &dynamodb.PutItemInput{
-		Item:      item,
+		Item:      av,
 		TableName: aws.String(tableName),
 	}
 
@@ -102,7 +93,39 @@ func Write(input data.UserProfile) error {
 		return err
 	}
 
-	log.I("Successfully added: %-v", Input)
+	log.I("Successfully write the item: %-v", av)
 
 	return nil
+}
+
+// Read is to retrive an item from dynamodb
+func Read(uid string) (data.UserProfile, error) {
+	var item data.UserProfile
+
+	result, err := db.GetItem(&dynamodb.GetItemInput{
+		TableName: aws.String(tableName),
+		Key: map[string]*dynamodb.AttributeValue{
+			"UID": {
+				S: aws.String(uid),
+			},
+		},
+	})
+	if err != nil {
+		log.D("fail to read : %v", err.Error())
+		return item, err
+	}
+
+	if len(result.Item) == 0 {
+		return item, errors.New("No result on query")
+	}
+
+	err = dynamodbattribute.UnmarshalMap(result.Item, &item)
+	if err != nil {
+		log.D("Failed to unmarshal Record, %v", err.Error())
+		return item, err
+	}
+
+	log.I("Successfully quaried in database: %+v", item)
+
+	return item, nil
 }

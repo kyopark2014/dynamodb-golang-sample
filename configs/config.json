@@ -10,7 +10,7 @@
         "WriteCapacity": 10
     },   
     "Redis":{
-        "Host": "10.101.249.189",
+        "Host": "localhost",
         "Port": "6379",
         "PoolMaxIdle":300,
         "PoolMaxActive":300,
