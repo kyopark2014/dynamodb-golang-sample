@@ -25,16 +25,13 @@ package service {
     }
     class BaseService {
         +service: Service
-        +wg: *sync.WaitGroup
-        +conf: *config.AppConfig
-        +log: *logger.Logger
+        +conf: *AppConfig
         +NewBaseService()
         +Run()
         +Stop()
     }
 
     class ProfileService {
-        +log: *logger.Logger
         +Insert()
         +Retreive()
         +LiveCheck()
@@ -46,11 +43,6 @@ package config {
         +GracefulTermTimeMillis: int64
         +GetInstance()
         +Load()
-    }
-
-    class Logging {
-        +Enable: bool
-        +Level: string
     }
 
     class RedisConfig{
@@ -84,8 +76,8 @@ package data {
 }
 
 package dynamo {    
-    class dynamodb {
-        +db: *dynamodb.DynamoDB
+    class DynamoDB {
+        +db: *DynamoDB
         +tableName:string
 	    +NewDatabase()
         +Write()
@@ -97,11 +89,11 @@ package rediscache {
     class RedisCache {
         +pool *redis.Pool
 	    +ttl int
-        +NewRedisCache()
-        +Close()
         +newPool()
         +GetCache()
         +SetCache()
+        +NewRedisCache()
+        +Close()
         +Del()
     }
 }
@@ -109,16 +101,15 @@ package rediscache {
 Service <|. BaseService
 BaseService <|. ProfileService
 main ..> service
-ProfileService ..> config
+ProfileService ..> AppConfig
 RedisCache --* ProfileService 
 RedisCache ..> UserProfile 
-AppConfig ..> Logging
-AppConfig ..> RedisConfig
-AppConfig ..> DynamoConfig
-dynamodb ..> AppConfig
-dynamodb ..> UserProfile
-dynamodb .* ProfileService
-RedisCache ..> RedisConfig
+AppConfig .> RedisConfig
+AppConfig .> DynamoConfig
+DynamoDB ..> DynamoConfig
+DynamoDB ..> UserProfile
+DynamoDB -* ProfileService
+RedisCache ...> RedisConfig
 
 
 @enduml
