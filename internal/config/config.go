@@ -54,7 +54,7 @@ func GetInstance() *AppConfig {
 
 // Load reads config file (e.g., configs/config.json) and
 // unmarshalls JSON string in it into Config structure
-func (AppConfig) Load(fname string) bool {
+func Load(fname string) bool {
 	log.D("Load config from the file \"" + fname + "\".")
 
 	b, err := ioutil.ReadFile(fname)

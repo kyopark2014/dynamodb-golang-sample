@@ -10,9 +10,10 @@ import (
 	"github.com/gomodule/redigo/redis"
 )
 
-var pool *redis.Pool
-
-var ttl int
+var (
+	pool *redis.Pool
+	var ttl int
+}
 
 // NewRedisCache is to set the configuration for redis
 func NewRedisCache(cfg config.RedisConfig) {

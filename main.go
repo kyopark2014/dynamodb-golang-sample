@@ -5,10 +5,18 @@ import (
 	"dynamodb-golang-sample/internal/log"
 	"dynamodb-golang-sample/internal/rediscache"
 	"dynamodb-golang-sample/internal/server"
+	"fmt"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
+)
+
+var (
+	serviceList []*server.BaseService
+	conf        *config.AppConfig
+	wg          sync.WaitGroup
 )
 
 //ExitSuccess is exit code 0 and ExitFailure is exit code 1
@@ -33,17 +41,17 @@ func main() {
 	log.E("Exiting service ...")
 }
 
-// Initialize initializes DB and updates DB tables.
+// Initialize is to setup the basic
 func Initialize() error {
 	log.I("initiate the service...")
 
 	// Configuration loading
 	var configFileName string = "configs/config.json"
 
-	conf := config.GetInstance()
+	conf = config.GetInstance()
 	if !conf.Load(configFileName) {
-		log.E("Failed to load config file: %s", configFileName)
-		os.Exit(1)
+		err := fmt.Errorf("Failed to load config file: %s", configFileName)
+		return err
 	}
 	log.D("Configuration has been loaded.")
 
@@ -57,15 +65,12 @@ func Initialize() error {
 		for sig := range sigCh {
 			if sig == syscall.SIGINT || sig == syscall.SIGTERM {
 				log.D("Graceful Termination Time = %d", conf.GracefulTermTimeMillis)
-				time.Sleep(time.Duration(conf.GracefulTermTimeMillis) * time.Millisecond)
 				Finalize()
+				time.Sleep(time.Duration(conf.GracefulTermTimeMillis) * time.Millisecond)
 				os.Exit(ExitFailure)
 			}
 		}
 	}()
-
-	// initialize radis for in-memory cache
-	//	rediscache.NewRedisCache(conf.Redis)
 
 	return nil
 }
@@ -74,12 +79,16 @@ func Initialize() error {
 func StartService() error {
 	log.I("start the service...")
 
-	conf := config.GetInstance()
+	conf = config.GetInstance()
 
-	var err error
-	if err = server.InitServer(conf); err != nil {
-		log.E("Failed to start the HTTP(s) server: err:[%v]", err)
+	// if there are more services, those can be appened here
+	serviceList = append(serviceList, server.NewBaseService(&server.ProfileService{}, &wg, conf))
+
+	for _, service := range serviceList {
+		go service.Run()
 	}
+
+	wg.Wait()
 
 	return nil
 }
@@ -90,5 +99,8 @@ func StartService() error {
 func Finalize() {
 	//	db.Close()
 	rediscache.Close()
+	for _, service := range serviceList {
+		service.Stop()
+	}
 	log.E("Shutdown service...")
 }

@@ -1,0 +1,124 @@
+@startuml Basic Class
+skinparam class {
+    BackgroundColor White
+    ArrowColor Black
+    BorderColor Black
+    AttributeIconSize 0
+}
+'skinparam style strictuml
+skinparam stereotypeCBackgroundColor White
+skinparam stereotypeIBackgroundColor White
+skinparam stereotypeEBackgroundColor White
+skinparam stereotypeABackgroundColor White
+skinparam linetype ortho
+
+
+package main {
+
+}
+
+package service {
+    interface Service {
+        +Init()
+        +Start()
+        +OnTerminate()
+    }
+    class BaseService {
+        +service: Service
+        +wg: *sync.WaitGroup
+        +conf: *config.AppConfig
+        +log: *logger.Logger
+        +NewBaseService()
+        +Run()
+        +Stop()
+    }
+
+    class ProfileService {
+        +log: *logger.Logger
+        +Insert()
+        +Retreive()
+        +LiveCheck()
+    }
+}
+
+package config {
+    class AppConfig {
+        +GracefulTermTimeMillis: int64
+        +GetInstance()
+        +Load()
+    }
+
+    class Logging {
+        +Enable: bool
+        +Level: string
+    }
+
+    class RedisConfig{
+        +Host: string
+    	+ReaderHost: string
+	    +Port: string
+	    +PoolMaxIdle: int
+	    +PoolMaxActive: int
+	    +PoolIdleTimeout: int
+	    +TTL: int
+	    +Password: string
+	    +ConnTimeout: int
+    }
+
+    class DynamoConfig {
+        +Endpoint: string
+        +Region: string
+        +ReadCapacity: int64
+        +WriteCapacity: int64
+    }
+
+}
+
+package data {
+    class UserProfile {
+        +UID:   string
+	    +Name:  string
+	    +Email: string
+	    +Age:   int
+    }
+}
+
+package dynamo {    
+    class dynamodb {
+        +db: *dynamodb.DynamoDB
+        +tableName:string
+	    +NewDatabase()
+        +Write()
+        +Read()
+    }
+}
+
+package rediscache {    
+    class RedisCache {
+        +pool *redis.Pool
+	    +ttl int
+        +NewRedisCache()
+        +Close()
+        +newPool()
+        +GetCache()
+        +SetCache()
+        +Del()
+    }
+}
+
+Service <|. BaseService
+BaseService <|. ProfileService
+main ..> service
+ProfileService ..> config
+RedisCache --* ProfileService 
+RedisCache ..> UserProfile 
+AppConfig ..> Logging
+AppConfig ..> RedisConfig
+AppConfig ..> DynamoConfig
+dynamodb ..> AppConfig
+dynamodb ..> UserProfile
+dynamodb .* ProfileService
+RedisCache ..> RedisConfig
+
+
+@enduml

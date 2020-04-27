@@ -14,10 +14,10 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
-var db *dynamodb.DynamoDB
-
-// TableName for the name of data
-var tableName string
+var (
+	db        *dynamodb.DynamoDB
+	tableName string // TableName for the name of data
+)
 
 // NewDatabase is initiate the SQL database
 func NewDatabase(cfg config.DynamoConfig) error {
