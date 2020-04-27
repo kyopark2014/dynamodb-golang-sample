@@ -49,7 +49,7 @@ func Initialize() error {
 	var configFileName string = "configs/config.json"
 
 	conf = config.GetInstance()
-	if !conf.Load(configFileName) {
+	if !config.Load(configFileName) {
 		err := fmt.Errorf("Failed to load config file: %s", configFileName)
 		return err
 	}
