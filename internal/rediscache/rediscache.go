@@ -12,8 +12,8 @@ import (
 
 var (
 	pool *redis.Pool
-	var ttl int
-}
+	ttl int
+)
 
 // NewRedisCache is to set the configuration for redis
 func NewRedisCache(cfg config.RedisConfig) {
